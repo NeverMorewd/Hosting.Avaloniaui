@@ -89,7 +89,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
 
             var hostTask = host.RunAsync(token: cancellationToken);
 
-            var mainWindow = host.Services.GetRequiredService<TMainWindow>();
+            var mainWindow = host.Services.GetRequiredService<TMainWindow>() ?? throw new InvalidOperationException("The MainWindow must been registered in Services before running");
             if (builder.Instance.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime classicDesktop)
             {
                 classicDesktop.MainWindow = mainWindow;
