@@ -1,6 +1,12 @@
 name: .NET
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -9,12 +15,14 @@ jobs:
       matrix:
         os: [windows-2022, ubuntu-22.04, macos-12]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup .NET 8
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.x
     - name: Install dependencies
       run: dotnet restore
+      working-directory: src/AvaloniaSample
     - name: Build
-      run: dotnet build AvaloniaSample --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
+      working-directory: src/AvaloniaSample
