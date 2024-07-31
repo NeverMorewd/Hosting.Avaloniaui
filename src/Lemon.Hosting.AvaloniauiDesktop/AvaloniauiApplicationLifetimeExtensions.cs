@@ -22,7 +22,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
 
         public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
             Func<AppBuilder, AppBuilder> appBuilderConfiger)
-            where TApplication : Application, new()
+            where TApplication : Application
         {
             return services
                     .AddSingleton<TApplication>()
@@ -69,17 +69,37 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// <typeparam name="TApplication">The type of the avaloniaui application <see cref="Application"/> to run.</typeparam>
         /// <param name="commandArgs">commmandline args</param>
         /// <param name="cancellationToken">cancellationToken</param>
-        public static Task RunAvaliauiApplication<TMainWindow>(this IHost host,
+        public static Task RunAvaloniauiApplication<TMainWindow>(this IHost host,
             string[] commandArgs,
+            ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
             CancellationToken cancellationToken = default)
             where TMainWindow : Window
+        {
+            var mainWindowFactory = host.Services.GetRequiredService<TMainWindow>;
+
+            return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, mainWindowFactory, cancellationToken);
+        }
+
+        public static Task RunAvaloniauiApplication(this IHost host,
+            string[] commandArgs,
+            ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
+            CancellationToken cancellationToken = default)
+        {
+            return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, null, cancellationToken);
+        }
+
+        private static Task RunAvaloniauiApplicationCore(IHost host, 
+            string[] commandArgs,
+            ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
+            Func<Window>? mainWindowFactory = null,
+            CancellationToken cancellationToken = default)
         {
             _ = host ?? throw new ArgumentNullException(nameof(host));
             var builder = host.Services.GetRequiredService<AppBuilder>();
             builder = builder.SetupWithLifetime(new ClassicDesktopStyleApplicationLifetime
             {
                 Args = commandArgs,
-                ShutdownMode = ShutdownMode.OnMainWindowClose,
+                ShutdownMode = shutdownMode,
             });
 
             if (builder.Instance == null)
@@ -89,10 +109,12 @@ namespace Lemon.Hosting.AvaloniauiDesktop
 
             var hostTask = host.RunAsync(token: cancellationToken);
 
-            var mainWindow = host.Services.GetRequiredService<TMainWindow>() ?? throw new InvalidOperationException("The MainWindow must been registered in Services before running");
             if (builder.Instance.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime classicDesktop)
             {
-                classicDesktop.MainWindow = mainWindow;
+                if (mainWindowFactory != null)
+                {
+                    classicDesktop.MainWindow = mainWindowFactory() ?? throw new InvalidOperationException("The MainWindow must been registered in Services before running");
+                }
                 ///https://github.com/AvaloniaUI/Avalonia/pull/16167
                 Environment.ExitCode = classicDesktop.Start(classicDesktop.Args ?? []);
 #if DEBUG

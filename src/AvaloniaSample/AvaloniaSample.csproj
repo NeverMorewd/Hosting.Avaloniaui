@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
 	<PublishAot>true</PublishAot>
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
@@ -30,5 +30,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lemon.Hosting.AvaloniauiDesktop\Lemon.Hosting.AvaloniauiDesktop.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Update="AppWithServiceProvider.axaml.cs">
+      <DependentUpon>AppWithServiceProvider.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
