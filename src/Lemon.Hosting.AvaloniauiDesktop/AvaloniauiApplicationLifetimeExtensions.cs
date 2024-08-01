@@ -41,7 +41,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         }
 
         /// <summary>
-        /// Add MainWindow&MainWindowViewModel to ServiceCollection.Note:Can not support native AOT for now
+        /// Add MainWindow&MainWindowViewModel to ServiceCollection.Note:Support native AOT with rd.xml
         /// </summary>
         /// <typeparam name="TWindow"><see cref="Window"/></typeparam>
         /// <typeparam name="TViewModel">MainWindowViewModel</typeparam>
@@ -66,7 +66,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// Runs the avaloniaui application along with the .NET generic host.
         /// Note:
         /// 1.Host will set the ShutdownMode with ShutdownMode.OnMainWindowClose
-        /// 2.Can not support native AOT for now
+        /// 2.Support native AOT with rd.xml
         /// </summary>
         /// <typeparam name="TApplication">The type of the avaloniaui application <see cref="Application"/> to run.</typeparam>
         /// <param name="commandArgs">commmandline args</param>

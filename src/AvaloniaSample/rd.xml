@@ -8,6 +8,7 @@
     -->
 	<Application>
 		<Assembly Name="Avalonia.Markup.Xaml" Dynamic="Required All"/>
+		<!-- For Aot with RunAvaloniauiApplication<TMainWindow> -->
 		<!--<Assembly Name="AvaloniaSample" Dynamic="Required All"/>-->
 	</Application>
 </Directives>

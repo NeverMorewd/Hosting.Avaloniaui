@@ -42,7 +42,7 @@ namespace AvaloniaSample
             RunAppDefault(hostBuilder, args);
             #endregion
 
-            #region app without mainwindow (does not support aot)
+            #region app without mainwindow (support aot with adding <Assembly Name="AvaloniaSample" Dynamic="Required All"/> to rd.xml)
             //RunAppWithoutMainWindow(hostBuilder, args);
             #endregion
 
