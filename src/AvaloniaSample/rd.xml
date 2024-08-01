@@ -8,5 +8,6 @@
     -->
 	<Application>
 		<Assembly Name="Avalonia.Markup.Xaml" Dynamic="Required All"/>
+		<!--<Assembly Name="AvaloniaSample" Dynamic="Required All"/>-->
 	</Application>
 </Directives>

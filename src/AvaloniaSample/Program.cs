@@ -38,15 +38,15 @@ namespace AvaloniaSample
             // add some services
             hostBuilder.Services.AddSingleton<ISomeService, SomeService>();
 
-            #region app default
+            #region app default (support aot)
             RunAppDefault(hostBuilder, args);
             #endregion
 
-            #region app without mainwindow
+            #region app without mainwindow (does not support aot)
             //RunAppWithoutMainWindow(hostBuilder, args);
             #endregion
 
-            #region app with serviceprovider
+            #region app with serviceprovider (support aot)
             //RunAppWithServiceProvider(hostBuilder, args);
             #endregion
         }

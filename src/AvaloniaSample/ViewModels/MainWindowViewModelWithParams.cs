@@ -23,11 +23,5 @@ namespace AvaloniaSample.ViewModels
                 });
         }
 
-        private string _stringValue = "Welcome to Avalonia";
-        public string StringValue
-        {
-            get { return _stringValue; }
-            set { this.RaiseAndSetIfChanged(ref _stringValue, value); }
-        }
     }
 }

@@ -41,22 +41,22 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         }
 
         /// <summary>
-        /// Add MainWindow&MainWindowViewModel to ServiceCollection
+        /// Add MainWindow&MainWindowViewModel to ServiceCollection.Note:Can not support native AOT for now
         /// </summary>
         /// <typeparam name="TWindow"><see cref="Window"/></typeparam>
         /// <typeparam name="TViewModel">MainWindowViewModel</typeparam>
         /// <param name="services"><see cref="IServiceCollection"></param>
         /// <returns></returns>
-        public static IServiceCollection AddMainWindow<TWindow, TViewModel>(this IServiceCollection services)
-            where TWindow : Window where TViewModel : class
+        public static IServiceCollection AddMainWindow<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TMainWindow, TViewModel>(this IServiceCollection services)
+            where TMainWindow : Window where TViewModel : class
         {
             return services
                 .AddSingleton<TViewModel>()
-                .AddSingleton(provider =>
-                { 
-                    var viewModel = provider.GetRequiredService<TViewModel>();
-                    var window= ActivatorUtilities.CreateInstance<TWindow>(provider);
-                    window.DataContext = viewModel;
+                .AddSingleton(sp =>
+                {
+                    var viewmodel = sp.GetRequiredService(typeof(TViewModel));
+                    var window = ActivatorUtilities.CreateInstance<TMainWindow>(sp);
+                    window.DataContext = viewmodel;
                     return window;
                 });
         }
@@ -64,7 +64,9 @@ namespace Lemon.Hosting.AvaloniauiDesktop
 
         /// <summary>
         /// Runs the avaloniaui application along with the .NET generic host.
-        /// Note:Host will set the ShutdownMode with ShutdownMode.OnMainWindowClose
+        /// Note:
+        /// 1.Host will set the ShutdownMode with ShutdownMode.OnMainWindowClose
+        /// 2.Can not support native AOT for now
         /// </summary>
         /// <typeparam name="TApplication">The type of the avaloniaui application <see cref="Application"/> to run.</typeparam>
         /// <param name="commandArgs">commmandline args</param>
@@ -76,10 +78,17 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             where TMainWindow : Window
         {
             var mainWindowFactory = host.Services.GetRequiredService<TMainWindow>;
-
             return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, mainWindowFactory, cancellationToken);
         }
 
+        /// <summary>
+        ///  Runs the avaloniaui application along with the .NET generic host.
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="commandArgs"></param>
+        /// <param name="shutdownMode"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static Task RunAvaloniauiApplication(this IHost host,
             string[] commandArgs,
             ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
@@ -88,7 +97,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, null, cancellationToken);
         }
 
-        private static Task RunAvaloniauiApplicationCore(IHost host, 
+        private static Task RunAvaloniauiApplicationCore(IHost host,
             string[] commandArgs,
             ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
             Func<Window>? mainWindowFactory = null,
