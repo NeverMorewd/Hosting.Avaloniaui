@@ -5,6 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<LangVersion>Latest</LangVersion>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Title>Lemon.Hosting.AvaloniauiDesktop</Title>
+	<Authors>Easley</Authors>
+	<Description>.NET Generic Host support for Avaloniaui app</Description>
+	<Copyright>All copyright reserved@https://github.com/NeverMorewd</Copyright>
+	<PackageProjectUrl>https://github.com/NeverMorewd/Hosting.Avaloniaui</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/NeverMorewd/Hosting.Avaloniaui</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
