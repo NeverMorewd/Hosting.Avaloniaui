@@ -1,7 +1,7 @@
 # Hosting.Avaloniaui
 .NET Generic Host support for Avaloniaui app
 Support Aot!
-Examples:
+- Examples:
 ```
 internal sealed class Program
 {
