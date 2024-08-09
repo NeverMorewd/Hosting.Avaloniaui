@@ -1,5 +1,5 @@
 # Hosting.Avaloniaui
-.NET Generic Host support for Avaloniaui app
+.NET Generic Host support for Avaloniaui desktop app.
 Support Aot!
 - Examples:
 ```
