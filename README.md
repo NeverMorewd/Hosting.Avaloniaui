@@ -2,7 +2,7 @@
 .NET Generic Host support for Avaloniaui desktop app.
 Support Aot!
 - Examples:
-```
+```C#
 internal sealed class Program
 {
     [STAThread]
