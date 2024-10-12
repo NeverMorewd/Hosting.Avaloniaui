@@ -1,7 +1,11 @@
-# Hosting.Avaloniaui
+<p align="center">
+    <img src="https://github.com/NeverMorewd/Lemon.ModuleNavigation/blob/master/src/Lemon.ModuleNavigation.Sample/Assets/lemon-100.png" />
+</p>
+
+[![NuGet Badge](https://img.shields.io/badge/NuGet-v1.0.0-blue.svg)](https://www.nuget.org/packages/Lemon.Hosting.AvaloniauiDesktop)
+# Introduction
 .NET Generic Host support for Avaloniaui desktop app.
 Support Aot!
-[NuGet package](https://www.nuget.org/packages/Lemon.Hosting.AvaloniauiDesktop/)
 - Examples:
 ```C#
 internal sealed class Program
