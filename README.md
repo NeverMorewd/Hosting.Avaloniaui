@@ -6,6 +6,7 @@
   <a href="https://www.nuget.org/packages/Lemon.ModuleNavigation/">
     <img src="https://img.shields.io/badge/NuGet-v1.0.0-blue.svg" alt="NuGet Package Version"/>
   </a>
+    
   <img src="https://img.shields.io/badge/AOT-Supported-brightgreen.svg" alt="AOT Supported"/>
   <img src="https://img.shields.io/badge/Linux-Supported-yellow.svg" alt="Linux Supported"/>
   <img src="https://img.shields.io/badge/macOS-Supported-ff69b4.svg" alt="macOS Supported"/>
