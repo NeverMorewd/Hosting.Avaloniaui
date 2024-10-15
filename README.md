@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  <a href="https://www.nuget.org/packages/Lemon.ModuleNavigation/">
-    <img src="https://img.shields.io/badge/NuGet-v1.0.0-blue.svg" alt="NuGet Package Version"/>
+  <a href="https://www.nuget.org/packages/Lemon.Hosting.AvaloniauiDesktop/">
+    <img src="https://img.shields.io/nuget/v/Lemon.Hosting.AvaloniauiDesktop.svg?label=NuGet" alt="NuGet Package Version"/>
   </a>
     
   <img src="https://img.shields.io/badge/AOT-Supported-brightgreen.svg" alt="AOT Supported"/>
