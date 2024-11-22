@@ -78,7 +78,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             where TMainWindow : Window
         {
             var mainWindowFactory = host.Services.GetRequiredService<TMainWindow>;
-            return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, mainWindowFactory, cancellationToken);
+            return RunCore(host, commandArgs, shutdownMode, mainWindowFactory, cancellationToken);
         }
 
         /// <summary>
@@ -94,10 +94,10 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
             CancellationToken cancellationToken = default)
         {
-            return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, null, cancellationToken);
+            return RunCore(host, commandArgs, shutdownMode, null, cancellationToken);
         }
 
-        private static Task RunAvaloniauiApplicationCore(IHost host,
+        private static Task RunCore(IHost host,
             string[] commandArgs,
             ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
             Func<Window>? mainWindowFactory = null,
@@ -134,6 +134,29 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             {
                 throw new InvalidOperationException("Generic host support classic desktop only!");
             }
+            return hostTask;
+        }
+
+        private static Task RunCoreWithoutLifetime(IHost host,
+            string[] commandArgs,
+            Func<Window> mainWindowFactory,
+            CancellationToken cancellationToken = default)
+        {
+            _ = host ?? throw new ArgumentNullException(nameof(host));
+            var builder = host.Services.GetRequiredService<AppBuilder>();
+            if (builder.Instance == null)
+            {
+                throw new InvalidOperationException("AppBuilder has not been initialized yet!");
+            }
+
+            var hostTask = host.RunAsync(token: cancellationToken);
+
+            builder.Start((app, args) =>
+            {
+                app.Run(mainWindowFactory());
+            },
+            commandArgs);
+
             return hostTask;
         }
     }
