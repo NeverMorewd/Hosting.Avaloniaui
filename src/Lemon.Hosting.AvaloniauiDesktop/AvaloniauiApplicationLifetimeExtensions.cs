@@ -61,7 +61,6 @@ namespace Lemon.Hosting.AvaloniauiDesktop
                 });
         }
 
-
         /// <summary>
         /// Runs the avaloniaui application along with the .NET generic host.
         /// Note:
@@ -91,7 +90,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// <returns></returns>
         public static Task RunAvaloniauiApplication(this IHost host,
             string[] commandArgs,
-            ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
+            ShutdownMode shutdownMode = ShutdownMode.OnMainWindowClose,
             CancellationToken cancellationToken = default)
         {
             return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, null, cancellationToken);
@@ -99,7 +98,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
 
         private static Task RunAvaloniauiApplicationCore(IHost host,
             string[] commandArgs,
-            ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
+            ShutdownMode shutdownMode = ShutdownMode.OnMainWindowClose,
             Func<Window>? mainWindowFactory = null,
             CancellationToken cancellationToken = default)
         {
@@ -122,7 +121,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             {
                 if (mainWindowFactory != null)
                 {
-                    classicDesktop.MainWindow = mainWindowFactory() ?? throw new InvalidOperationException("The MainWindow must been registered in Services before running");
+                    classicDesktop.MainWindow = mainWindowFactory() ?? throw new InvalidOperationException("The MainWindow must be registered before running");
                 }
                 ///https://github.com/AvaloniaUI/Avalonia/pull/16167
                 Environment.ExitCode = classicDesktop.Start(classicDesktop.Args ?? []);
