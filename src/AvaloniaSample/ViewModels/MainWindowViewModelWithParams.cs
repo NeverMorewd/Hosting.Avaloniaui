@@ -1,6 +1,5 @@
 ﻿using AvaloniaSample.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
@@ -19,7 +18,7 @@ namespace AvaloniaSample.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ =>
                 {
-                    StringValue = $"Welcome to Avalonia:{someService.GetSomeNumber()}";
+                    StringValue = $"Welcome to Lemon.Hosting.AvaloniauiDesktop:{_someService.GetSomeNumber()}";
                 });
         }
 

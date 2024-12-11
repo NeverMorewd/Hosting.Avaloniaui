@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
 using AvaloniaSample.Services;
 using AvaloniaSample.ViewModels;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
@@ -22,7 +22,6 @@ namespace AvaloniaSample
         [SupportedOSPlatform("windows")]
         [SupportedOSPlatform("linux")]
         [SupportedOSPlatform("macos")]
-        [RequiresDynamicCode("Calls Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder()")]
         public static void Main(string[] args)
         {
             var hostBuilder = Host.CreateApplicationBuilder();
@@ -38,16 +37,24 @@ namespace AvaloniaSample
             // add some services
             hostBuilder.Services.AddSingleton<ISomeService, SomeService>();
 
-            #region app default (support aot)
-            RunAppDefault(hostBuilder, args);
+            #region run app default
+            //RunAppDefault(hostBuilder, args);
             #endregion
 
-            #region app without mainwindow (support aot with adding <Assembly Name="AvaloniaSample" Dynamic="Required All"/> to rd.xml)
-            //RunAppWithoutMainWindow(hostBuilder, args);
+            #region run empty app with mainwindow
+            //RunAppWithMainWindow(hostBuilder, args);
             #endregion
 
-            #region app with serviceprovider (support aot)
+            #region run app with serviceprovider
             //RunAppWithServiceProvider(hostBuilder, args);
+            #endregion
+
+            #region run app with serviceprovider
+            //RunAppWithLifetime(hostBuilder, args);
+            #endregion
+
+            #region run app with serviceprovider
+            RunAppWithLifetimePreSetupMainWindow(hostBuilder, args);
             #endregion
         }
 
@@ -77,10 +84,10 @@ namespace AvaloniaSample
         [SupportedOSPlatform("linux")]
         [SupportedOSPlatform("macos")]
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        private static void RunAppWithoutMainWindow(HostApplicationBuilder hostBuilder, string[] args)
+        private static void RunAppWithMainWindow(HostApplicationBuilder hostBuilder, string[] args)
         {
             // add avaloniaui application and config AppBuilder
-            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppWithoutMainWindow>(ConfigAvaloniaAppBuilder);
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppEmpty>(ConfigAvaloniaAppBuilder);
             // add MainWindow & MainWindowViewModelWithParams
             hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
             // build host
@@ -102,6 +109,48 @@ namespace AvaloniaSample
             // build host
             var appHost = hostBuilder.Build();
             // run app
+            appHost.RunAvaloniauiApplication(args);
+        }
+        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("linux")]
+        [SupportedOSPlatform("macos")]
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        private static void RunAppWithLifetime(HostApplicationBuilder hostBuilder, string[] args)
+        {
+
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppDefault>(ConfigAvaloniaAppBuilder);
+            hostBuilder.Services.AddApplicationLifetime((sp) => 
+            {
+                var lifetime = new ClassicDesktopStyleApplicationLifetime
+                {
+                    Args = args,
+                    ShutdownMode = ShutdownMode.OnMainWindowClose
+                };
+                return lifetime;
+            });
+            // build host
+            var appHost = hostBuilder.Build();
+            // run app
+            appHost.RunAvaloniauiApplication(args);
+        }
+        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("linux")]
+        [SupportedOSPlatform("macos")]
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        private static void RunAppWithLifetimePreSetupMainWindow(HostApplicationBuilder hostBuilder, string[] args)
+        {
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppEmpty>(ConfigAvaloniaAppBuilder);
+            hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
+            hostBuilder.Services.AddApplicationLifetime<MainWindow>((sp) =>
+            {
+                var lifetime = new ClassicDesktopStyleApplicationLifetime
+                {
+                    Args = args,
+                    ShutdownMode = ShutdownMode.OnMainWindowClose
+                };
+                return lifetime;
+            });
+            var appHost = hostBuilder.Build();
             appHost.RunAvaloniauiApplication(args);
         }
     }
