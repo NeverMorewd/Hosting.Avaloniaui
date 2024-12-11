@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using AvaloniaSample.ViewModels;
@@ -22,11 +21,7 @@ public partial class AppDefault : Application
             {
                 DataContext = new MainWindowViewModel(),
             };
-
-            /// override ShutdownMode
-            //desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnMainWindowClose;
         }
-
         base.OnFrameworkInitializationCompleted();
     }
 }

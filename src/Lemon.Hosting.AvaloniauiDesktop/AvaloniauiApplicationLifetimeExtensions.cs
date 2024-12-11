@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 
@@ -19,7 +20,6 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// </summary>
         /// <typeparam name="TApplication">The type of avaloniaui application <see cref="Application"/> to manage.</typeparam>
         /// <param name="appBuilderConfiger"><see cref="AppBuilder.Configure{TApplication}()"/></param>
-
         public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
             Func<AppBuilder, AppBuilder> appBuilderConfiger)
             where TApplication : Application
@@ -41,24 +41,66 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         }
 
         /// <summary>
-        /// Add MainWindow&MainWindowViewModel to ServiceCollection.Note:Support native AOT with rd.xml
+        /// Add MainWindow&MainWindowViewModel to ServiceCollection.
         /// </summary>
         /// <typeparam name="TWindow"><see cref="Window"/></typeparam>
         /// <typeparam name="TViewModel">MainWindowViewModel</typeparam>
         /// <param name="services"><see cref="IServiceCollection"></param>
         /// <returns></returns>
         public static IServiceCollection AddMainWindow<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TMainWindow, TViewModel>(this IServiceCollection services)
-            where TMainWindow : Window where TViewModel : class
+            where TMainWindow : Window 
+            where TViewModel : class
         {
             return services
                 .AddSingleton<TViewModel>()
+                .AddKeyedSingleton<Window,TMainWindow>(typeof(TMainWindow))
                 .AddSingleton(sp =>
                 {
-                    var viewmodel = sp.GetRequiredService(typeof(TViewModel));
-                    var window = ActivatorUtilities.CreateInstance<TMainWindow>(sp);
+                    var viewmodel = sp.GetRequiredService<TViewModel>();
+                    var window = sp.GetRequiredKeyedService<Window>(typeof(TMainWindow));
                     window.DataContext = viewmodel;
-                    return window;
+                    return (window as TMainWindow)!;
                 });
+        }
+
+        /// <summary>
+        /// Add ApplicationLifetime
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="lifetimeBuilder"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddApplicationLifetime(this IServiceCollection services, Func<IServiceProvider, IClassicDesktopStyleApplicationLifetime> lifetimeBuilder)
+        {
+            return services
+                    .AddSingleton(sp =>
+                    {
+                        var appBuilder = sp.GetRequiredService<AppBuilder>();
+                        var lifetime = lifetimeBuilder(sp);
+                        appBuilder = appBuilder.SetupWithLifetime(lifetime);
+                        return lifetime;
+                    });
+        }
+
+        /// <summary>
+        /// Add ApplicationLifetime along with MainWindow
+        /// </summary>
+        /// <typeparam name="TMainWindow"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="lifetimeBuilder"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddApplicationLifetime<TMainWindow>(this IServiceCollection services, 
+            Func<IServiceProvider, IClassicDesktopStyleApplicationLifetime> lifetimeBuilder) 
+            where TMainWindow : Window
+        {
+            return services
+                    .AddSingleton(sp =>
+                    {
+                        var appBuilder = sp.GetRequiredService<AppBuilder>();
+                        var lifetime = lifetimeBuilder(sp);
+                        appBuilder = appBuilder.SetupWithLifetime(lifetime);
+                        lifetime.MainWindow = sp.GetRequiredService<TMainWindow>();
+                        return lifetime;
+                    });
         }
 
         /// <summary>
@@ -76,12 +118,13 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             CancellationToken cancellationToken = default)
             where TMainWindow : Window
         {
-            var mainWindowFactory = host.Services.GetRequiredService<TMainWindow>;
-            return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, mainWindowFactory, cancellationToken);
+            return RunAvaloniauiApplicationCore<TMainWindow>(host, 
+                commandArgs, 
+                shutdownMode, 
+                cancellationToken);
         }
-
         /// <summary>
-        ///  Runs the avaloniaui application along with the .NET generic host.
+        /// Runs the avaloniaui application along with the .NET generic host.
         /// </summary>
         /// <param name="host"></param>
         /// <param name="commandArgs"></param>
@@ -89,18 +132,24 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static Task RunAvaloniauiApplication(this IHost host,
-            string[] commandArgs,
+            string[]? commandArgs = null,
             ShutdownMode shutdownMode = ShutdownMode.OnMainWindowClose,
             CancellationToken cancellationToken = default)
         {
-            return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, null, cancellationToken);
+            var lifetime = host.Services.GetService<IClassicDesktopStyleApplicationLifetime>();
+            if (lifetime == null)
+            {
+                return RunAvaloniauiApplicationCore(host, commandArgs, shutdownMode, cancellationToken);
+            }
+            else
+            {
+                return RunAvaloniauiApplicationCore(host, lifetime, commandArgs, cancellationToken);
+            }
         }
-
-        private static Task RunAvaloniauiApplicationCore(IHost host,
-            string[] commandArgs,
+        private static Task RunAvaloniauiApplicationCore<TMainWindow>(IHost host,
+            string[]? commandArgs,
             ShutdownMode shutdownMode = ShutdownMode.OnMainWindowClose,
-            Func<Window>? mainWindowFactory = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default) where TMainWindow : Window
         {
             _ = host ?? throw new ArgumentNullException(nameof(host));
             var builder = host.Services.GetRequiredService<AppBuilder>();
@@ -110,29 +159,60 @@ namespace Lemon.Hosting.AvaloniauiDesktop
                 ShutdownMode = shutdownMode,
             });
 
-            if (builder.Instance == null)
+            if (builder.Instance!.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime desktopLifetime)
             {
-                throw new InvalidOperationException("AppBuilder has not been initialized yet!");
+                var window = host.Services.GetRequiredService<TMainWindow>();
+                desktopLifetime.MainWindow = window;
+                return RunHost(host, desktopLifetime, cancellationToken);
             }
-
-            var hostTask = host.RunAsync(token: cancellationToken);
-
-            if (builder.Instance.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime classicDesktop)
+            throw new InvalidOperationException("Generic host support classic desktop only!");
+        }
+        private static Task RunAvaloniauiApplicationCore(IHost host,
+            string[]? commandArgs,
+            ShutdownMode shutdownMode = ShutdownMode.OnMainWindowClose,
+            CancellationToken cancellationToken = default)
+        {
+            _ = host ?? throw new ArgumentNullException(nameof(host));
+            var builder = host.Services.GetRequiredService<AppBuilder>();
+            
+            builder = builder.SetupWithLifetime(new ClassicDesktopStyleApplicationLifetime
             {
-                if (mainWindowFactory != null)
+                Args = commandArgs,
+                ShutdownMode = shutdownMode,
+            });
+
+            if (builder.Instance!.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime desktopLifetime)
+            {
+                return RunHost(host, desktopLifetime, cancellationToken);
+            }
+            throw new InvalidOperationException("Generic host support classic desktop only!");
+        }
+
+        private static Task RunAvaloniauiApplicationCore(IHost host,
+            IClassicDesktopStyleApplicationLifetime lifetime,
+            string[]? commandArgs = null,
+            CancellationToken cancellationToken = default)
+        {
+            _ = host ?? throw new ArgumentNullException(nameof(host));
+            ///https://github.com/AvaloniaUI/Avalonia/issues/17747
+            if (lifetime is ClassicDesktopStyleApplicationLifetime desktopLifetime)
+            {
+                if (commandArgs != null && commandArgs.Length > 0)
                 {
-                    classicDesktop.MainWindow = mainWindowFactory() ?? throw new InvalidOperationException("The MainWindow must be registered before running");
+                    desktopLifetime.Args = commandArgs;
                 }
-                ///https://github.com/AvaloniaUI/Avalonia/pull/16167
-                Environment.ExitCode = classicDesktop.Start(classicDesktop.Args ?? []);
-#if DEBUG
-                Console.WriteLine($"Process has been exited:{Environment.ExitCode}");
-#endif
+                return RunHost(host, desktopLifetime, cancellationToken);
             }
-            else
-            {
-                throw new InvalidOperationException("Generic host support classic desktop only!");
-            }
+            throw new InvalidOperationException($"Support '{nameof(ClassicDesktopStyleApplicationLifetime)}' only!");
+        }
+
+        private static Task RunHost(IHost host,
+            ClassicDesktopStyleApplicationLifetime lifetime,
+            CancellationToken cancellationToken = default)
+        {
+            var hostTask = host.RunAsync(token: cancellationToken);
+            Environment.ExitCode = lifetime.Start(lifetime.Args ?? []);
+            Debug.WriteLine($"ApplicationLifetime is terminated:{Environment.ExitCode}");
             return hostTask;
         }
     }

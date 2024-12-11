@@ -6,19 +6,24 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:AvaloniaSample.ViewModels"
     Title="AvaloniaSample"
-	x:DataType="vm:ViewModelBase"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    
+    x:DataType="vm:ViewModelBase"
+    ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/avalonia-logo.ico"
     mc:Ignorable="d">
 
-    <DockPanel>
+    <DockPanel LastChildFill="True">
+        <Button
+			HorizontalAlignment="Stretch"
+			HorizontalContentAlignment="Center"
+            Command="{Binding ShutDownCommand}"
+            Content="ShutDown"
+            DockPanel.Dock="Bottom" />
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Text="{Binding StringValue}" />
-		<Button Content="ShutDown" Command="{Binding ShutDownCommand}"/>
     </DockPanel>
 
 </Window>

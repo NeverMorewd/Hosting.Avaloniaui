@@ -34,7 +34,6 @@ namespace AvaloniaSample
                 /// ShutdownMode has been configured in hosting
                 //desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnMainWindowClose;
             }
-
             base.OnFrameworkInitializationCompleted();
         }
     }
