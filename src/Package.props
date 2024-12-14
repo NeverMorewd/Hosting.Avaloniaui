@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <Version>1.0.1-beta</Version>
+        <Authors>Easley</Authors>
+        <RepositoryUrl>https://github.com/NeverMorewd/Hosting.Avaloniaui</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <PackageProjectUrl>https://github.com/NeverMorewd/Hosting.Avaloniaui</PackageProjectUrl>
+    </PropertyGroup>
+</Project>
