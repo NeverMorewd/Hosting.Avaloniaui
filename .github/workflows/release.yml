@@ -12,8 +12,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
-
-      - name: Build Nuget package
+        
+      - name: Build the Project
+        run: dotnet build ./src/Lemon.Hosting.AvaloniauiDesktop --configuration Release
+        
+      - name: Pack Nuget
         run: dotnet pack ./src/Lemon.Hosting.AvaloniauiDesktop -o ./nugets
 
       - name: Publish NuGet package
