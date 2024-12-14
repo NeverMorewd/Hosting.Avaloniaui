@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="../Package.props" />
   <PropertyGroup>
 	<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,7 +12,19 @@
 	<Copyright>All copyright reserved@https://github.com/NeverMorewd</Copyright>
 	<PackageProjectUrl>https://github.com/NeverMorewd/Hosting.Avaloniaui</PackageProjectUrl>
 	<RepositoryUrl>https://github.com/NeverMorewd/Hosting.Avaloniaui</RepositoryUrl>
+	<PackageIcon>lemon-100.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\lemon-100.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.0.11" />
