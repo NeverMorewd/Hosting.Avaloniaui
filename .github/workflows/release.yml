@@ -2,9 +2,9 @@ name: Pack Nuget
 
 on:
   push:
-    branches: [ "action/pack" ]
+    branches: [ "action/release" ]
   pull_request:
-    branches: [ "action/pack" ]
+    branches: [ "action/release" ]
 
 jobs:
   nuget:
