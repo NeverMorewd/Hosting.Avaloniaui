@@ -20,6 +20,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// </summary>
         /// <typeparam name="TApplication">The type of avaloniaui application <see cref="Application"/> to manage.</typeparam>
         /// <param name="appBuilderConfiger"><see cref="AppBuilder.Configure{TApplication}()"/></param>
+        [Obsolete("This method will break the design view.")]
         public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
             Func<AppBuilder, AppBuilder> appBuilderConfiger)
             where TApplication : Application
@@ -39,7 +40,32 @@ namespace Lemon.Hosting.AvaloniauiDesktop
                     })
                     .AddSingleton<IHostLifetime, AvaloniauiApplicationLifetime<TApplication>>();
         }
+        /// <summary>
+        /// Configures the host to use avaloniaui application lifetime.This method does not violate the definition of AppBuilder in Avaloniaui.
+        /// </summary>
+        /// <typeparam name="TApplication"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="appBuilderConfiger"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
+           Func<AppBuilder> appBuilderConfiger)
+           where TApplication : Application
+        {
+            return services
+                    .AddSingleton<TApplication>()
+                    .AddSingleton(provider =>
+                    {
+                        var appBuilder = AppBuilder.Configure(() =>
+                        {
+                            return provider.GetRequiredService<TApplication>();
+                        });
 
+                        appBuilder = appBuilderConfiger();
+
+                        return appBuilder;
+                    })
+                    .AddSingleton<IHostLifetime, AvaloniauiApplicationLifetime<TApplication>>();
+        }
         /// <summary>
         /// Add MainWindow&MainWindowViewModel to ServiceCollection.
         /// </summary>
