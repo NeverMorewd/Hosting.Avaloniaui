@@ -20,7 +20,6 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// </summary>
         /// <typeparam name="TApplication">The type of avaloniaui application <see cref="Application"/> to manage.</typeparam>
         /// <param name="appBuilderConfiger"><see cref="AppBuilder.Configure{TApplication}()"/></param>
-        [Obsolete("This method will break the design view.")]
         public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
             Func<AppBuilder, AppBuilder> appBuilderConfiger)
             where TApplication : Application
@@ -35,32 +34,6 @@ namespace Lemon.Hosting.AvaloniauiDesktop
                         });
 
                         appBuilder = appBuilderConfiger(appBuilder);
-
-                        return appBuilder;
-                    })
-                    .AddSingleton<IHostLifetime, AvaloniauiApplicationLifetime<TApplication>>();
-        }
-        /// <summary>
-        /// Configures the host to use avaloniaui application lifetime.This method does not violate the definition of AppBuilder in Avaloniaui.
-        /// </summary>
-        /// <typeparam name="TApplication"></typeparam>
-        /// <param name="services"></param>
-        /// <param name="appBuilderConfiger"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
-           Func<AppBuilder> appBuilderConfiger)
-           where TApplication : Application
-        {
-            return services
-                    .AddSingleton<TApplication>()
-                    .AddSingleton(provider =>
-                    {
-                        var appBuilder = AppBuilder.Configure(() =>
-                        {
-                            return provider.GetRequiredService<TApplication>();
-                        });
-
-                        appBuilder = appBuilderConfiger();
 
                         return appBuilder;
                     })
@@ -98,35 +71,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         public static IServiceCollection AddApplicationLifetime(this IServiceCollection services, Func<IServiceProvider, IClassicDesktopStyleApplicationLifetime> lifetimeBuilder)
         {
             return services
-                    .AddSingleton(sp =>
-                    {
-                        var appBuilder = sp.GetRequiredService<AppBuilder>();
-                        var lifetime = lifetimeBuilder(sp);
-                        appBuilder = appBuilder.SetupWithLifetime(lifetime);
-                        return lifetime;
-                    });
-        }
-
-        /// <summary>
-        /// Add ApplicationLifetime along with MainWindow
-        /// </summary>
-        /// <typeparam name="TMainWindow"></typeparam>
-        /// <param name="services"></param>
-        /// <param name="lifetimeBuilder"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddApplicationLifetime<TMainWindow>(this IServiceCollection services, 
-            Func<IServiceProvider, IClassicDesktopStyleApplicationLifetime> lifetimeBuilder) 
-            where TMainWindow : Window
-        {
-            return services
-                    .AddSingleton(sp =>
-                    {
-                        var appBuilder = sp.GetRequiredService<AppBuilder>();
-                        var lifetime = lifetimeBuilder(sp);
-                        appBuilder = appBuilder.SetupWithLifetime(lifetime);
-                        lifetime.MainWindow = sp.GetRequiredService<TMainWindow>();
-                        return lifetime;
-                    });
+                    .AddSingleton(lifetimeBuilder);
         }
 
         /// <summary>
@@ -169,7 +114,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
             }
             else
             {
-                return RunAvaloniauiApplicationCore(host, lifetime, commandArgs, cancellationToken);
+                return RunAvaloniauiApplicationCore(host, lifetime, cancellationToken);
             }
         }
         private static Task RunAvaloniauiApplicationCore<TMainWindow>(IHost host,
@@ -216,17 +161,11 @@ namespace Lemon.Hosting.AvaloniauiDesktop
 
         private static Task RunAvaloniauiApplicationCore(IHost host,
             IClassicDesktopStyleApplicationLifetime lifetime,
-            string[]? commandArgs = null,
             CancellationToken cancellationToken = default)
         {
             _ = host ?? throw new ArgumentNullException(nameof(host));
-            ///https://github.com/AvaloniaUI/Avalonia/issues/17747
             if (lifetime is ClassicDesktopStyleApplicationLifetime desktopLifetime)
             {
-                if (commandArgs != null && commandArgs.Length > 0)
-                {
-                    desktopLifetime.Args = commandArgs;
-                }
                 return RunHost(host, desktopLifetime, cancellationToken);
             }
             throw new InvalidOperationException($"Support '{nameof(ClassicDesktopStyleApplicationLifetime)}' only!");

@@ -38,7 +38,7 @@ namespace AvaloniaSample
             hostBuilder.Services.AddSingleton<ISomeService, SomeService>();
 
             #region run app default
-            RunAppDefault(hostBuilder, args);
+            //RunAppDefault(hostBuilder, args);
             #endregion
 
             #region run empty app with mainwindow
@@ -54,7 +54,7 @@ namespace AvaloniaSample
             #endregion
 
             #region run app with serviceprovider
-            //RunAppWithLifetimePreSetupMainWindow(hostBuilder, args);
+            RunAppWithLifetimePreSetupMainWindow(hostBuilder, args);
             #endregion
         }
 
@@ -91,7 +91,7 @@ namespace AvaloniaSample
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         private static void RunAppDefault(HostApplicationBuilder hostBuilder, string[] args)
         {
-            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppDefault>(BuildAvaloniaApp);
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppDefault>(ConfigAvaloniaAppBuilder);
             // build host
             var appHost = hostBuilder.Build();
             // run app
@@ -105,7 +105,7 @@ namespace AvaloniaSample
         private static void RunAppWithMainWindow(HostApplicationBuilder hostBuilder, string[] args)
         {
             // add avaloniaui application and config AppBuilder
-            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppEmpty>(BuildAvaloniaApp);
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppEmpty>(ConfigAvaloniaAppBuilder);
             // add MainWindow & MainWindowViewModelWithParams
             hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
             // build host
@@ -136,7 +136,7 @@ namespace AvaloniaSample
         private static void RunAppWithLifetime(HostApplicationBuilder hostBuilder, string[] args)
         {
 
-            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppDefault>(BuildAvaloniaApp);
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppDefault>(ConfigAvaloniaAppBuilder);
             hostBuilder.Services.AddApplicationLifetime((sp) => 
             {
                 var lifetime = new ClassicDesktopStyleApplicationLifetime
@@ -157,19 +157,22 @@ namespace AvaloniaSample
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         private static void RunAppWithLifetimePreSetupMainWindow(HostApplicationBuilder hostBuilder, string[] args)
         {
-            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppEmpty>(BuildAvaloniaApp);
+            hostBuilder.Services.AddAvaloniauiDesktopApplication<AppEmpty>(ConfigAvaloniaAppBuilder);
             hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
-            hostBuilder.Services.AddApplicationLifetime<MainWindow>((sp) =>
+            hostBuilder.Services.AddApplicationLifetime((sp) =>
             {
                 var lifetime = new ClassicDesktopStyleApplicationLifetime
                 {
                     Args = args,
-                    ShutdownMode = ShutdownMode.OnMainWindowClose
+                    ShutdownMode = ShutdownMode.OnMainWindowClose,
                 };
+                var appbuild = sp.GetRequiredService<AppBuilder>();
+                appbuild.SetupWithLifetime(lifetime);
+                lifetime.MainWindow = sp.GetRequiredService<MainWindow>();
                 return lifetime;
             });
             var appHost = hostBuilder.Build();
-            appHost.RunAvaloniauiApplication(args);
+            appHost.RunAvaloniauiApplication();
         }
     }
 }
