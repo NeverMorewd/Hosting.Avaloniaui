@@ -1,6 +1,4 @@
-﻿<p align="center">
-    <img src="https://github.com/NeverMorewd/Lemon.ModuleNavigation/blob/master/src/Lemon.ModuleNavigation.Sample/Assets/lemon-100.png" />
-</p>
+﻿# 🚀 Hosting.AvaloniauiDesktop
 
 <p align="center">
   <a href="https://www.nuget.org/packages/Lemon.Hosting.AvaloniauiDesktop/">
