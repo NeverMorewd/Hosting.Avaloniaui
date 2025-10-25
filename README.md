@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
     <img src="https://github.com/NeverMorewd/Lemon.ModuleNavigation/blob/master/src/Lemon.ModuleNavigation.Sample/Assets/lemon-100.png" />
 </p>
 
@@ -15,7 +15,7 @@
 
 # Introduction
 .NET Generic Host support for Avaloniaui desktop app.
-Support Aot!
+Support native aot!
 - Examples:
 ```C#
 internal sealed class Program
