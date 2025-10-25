@@ -41,7 +41,7 @@ internal sealed class Program
     {
         hostBuilder.Services.AddAppBuilder(BuildAvaloniaApp);
         var appHost = hostBuilder.Build();
-        appHost.RunAvaloniaApp();
+        appHost.RunAvaloniaAppAsync();
     }
 
     public static AppBuilder BuildAvaloniaApp()
