@@ -21,10 +21,6 @@ Support native aot!
 internal sealed class Program
 {
     [STAThread]
-    [SupportedOSPlatform("windows")]
-    [SupportedOSPlatform("linux")]
-    [SupportedOSPlatform("macos")]
-    [RequiresDynamicCode("Calls Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder()")]
     public static void Main(string[] args)
     {
         var hostBuilder = Host.CreateApplicationBuilder();
@@ -40,71 +36,23 @@ internal sealed class Program
         // add some services
         hostBuilder.Services.AddSingleton<ISomeService, SomeService>();
 
-        #region app default
-        RunAppDefault(hostBuilder, args);
-        #endregion
-
-        #region app without mainwindow
-        //RunAppWithoutMainWindow(hostBuilder, args);
-        #endregion
-
-        #region app with serviceprovider
-        //RunAppWithServiceProvider(hostBuilder, args);
-        #endregion
+        RunApp(hostBuilder);
     }
 
-    public static AppBuilder ConfigAvaloniaAppBuilder(AppBuilder appBuilder)
+    private static void RunApp(HostApplicationBuilder hostBuilder)
     {
-        return appBuilder
+        hostBuilder.Services.AddAppBuilder(BuildAvaloniaApp);
+        var appHost = hostBuilder.Build();
+        appHost.RunAvaloniaApp();
+    }
+
+    public static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<App>()
                     .UsePlatformDetect()
                     .WithInterFont()
                     .LogToTrace()
                     .UseReactiveUI();
-    }
-
-    [SupportedOSPlatform("windows")]
-    [SupportedOSPlatform("linux")]
-    [SupportedOSPlatform("macos")]
-    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-    private static void RunAppDefault(HostApplicationBuilder hostBuilder, string[] args)
-    {
-        hostBuilder.Services.AddAvaloniauiDesktopApplication<AppDefault>(ConfigAvaloniaAppBuilder);
-        // build host
-        var appHost = hostBuilder.Build();
-        // run app
-        appHost.RunAvaloniauiApplication(args);
-    }
-
-    [SupportedOSPlatform("windows")]
-    [SupportedOSPlatform("linux")]
-    [SupportedOSPlatform("macos")]
-    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-    private static void RunAppWithoutMainWindow(HostApplicationBuilder hostBuilder, string[] args)
-    {
-        // add avaloniaui application and config AppBuilder
-        hostBuilder.Services.AddAvaloniauiDesktopApplication<AppWithoutMainWindow>(ConfigAvaloniaAppBuilder);
-        // add MainWindow & MainWindowViewModelWithParams
-        hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
-        // build host
-        var appHost = hostBuilder.Build();
-        // run app
-        appHost.RunAvaloniauiApplication<MainWindow>(args);
-    }
-
-    [SupportedOSPlatform("windows")]
-    [SupportedOSPlatform("linux")]
-    [SupportedOSPlatform("macos")]
-    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-    private static void RunAppWithServiceProvider(HostApplicationBuilder hostBuilder, string[] args) 
-    {
-        // add avaloniaui application and config AppBuilder
-        hostBuilder.Services.AddAvaloniauiDesktopApplication<AppWithServiceProvider>(ConfigAvaloniaAppBuilder);
-        // add MainWindowViewModelWithParams
-        hostBuilder.Services.AddSingleton<MainWindowViewModelWithParams>();
-        // build host
-        var appHost = hostBuilder.Build();
-        // run app
-        appHost.RunAvaloniauiApplication(args);
     }
 }
 ```
