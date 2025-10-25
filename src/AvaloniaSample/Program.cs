@@ -79,7 +79,7 @@ internal sealed class Program
     {
         hostBuilder.Services.AddAppBuilder(BuildAvaloniaApp);
         var appHost = hostBuilder.Build();
-        appHost.RunAvaloniaApp();
+        appHost.RunAvaloniaAppAsync();
     }
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]
@@ -90,7 +90,7 @@ internal sealed class Program
         hostBuilder.Services.AddAppBuilder(BuildAvaloniaEmptyApp);
         hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
         var appHost = hostBuilder.Build();
-        appHost.RunAvaloniaApp();
+        appHost.RunAvaloniaAppAsync();
     }
 
     [SupportedOSPlatform("windows")]
@@ -106,6 +106,6 @@ internal sealed class Program
         });
         hostBuilder.Services.AddMainWindow<MainWindow, MainWindowViewModelWithParams>();
         var appHost = hostBuilder.Build();
-        appHost.RunAvaloniaApp();
+        appHost.RunAvaloniaAppAsync();
     }
 }
