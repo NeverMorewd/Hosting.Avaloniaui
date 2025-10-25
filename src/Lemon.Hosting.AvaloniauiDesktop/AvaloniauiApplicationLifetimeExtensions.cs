@@ -20,7 +20,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// </summary>
         /// <typeparam name="TApplication">The type of avaloniaui application <see cref="Application"/> to manage.</typeparam>
         /// <param name="appBuilderConfiger"><see cref="AppBuilder.Configure{TApplication}()"/></param>
-        public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication>(this IServiceCollection services,
+        public static IServiceCollection AddAvaloniauiDesktopApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TApplication>(this IServiceCollection services,
             Func<AppBuilder, AppBuilder> appBuilderConfiger)
             where TApplication : Application
         {
@@ -46,7 +46,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// <typeparam name="TViewModel">MainWindowViewModel</typeparam>
         /// <param name="services"><see cref="IServiceCollection"></param>
         /// <returns></returns>
-        public static IServiceCollection AddMainWindow<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TMainWindow, TViewModel>(this IServiceCollection services)
+        public static IServiceCollection AddMainWindow<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMainWindow, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TViewModel>(this IServiceCollection services)
             where TMainWindow : Window 
             where TViewModel : class
         {
@@ -83,7 +83,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
         /// <typeparam name="TApplication">The type of the avaloniaui application <see cref="Application"/> to run.</typeparam>
         /// <param name="commandArgs">commmandline args</param>
         /// <param name="cancellationToken">cancellationToken</param>
-        public static Task RunAvaloniauiApplication<TMainWindow>(this IHost host,
+        public static Task RunAvaloniauiApplication<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMainWindow>(this IHost host,
             string[] commandArgs,
             ShutdownMode shutdownMode = ShutdownMode.OnLastWindowClose,
             CancellationToken cancellationToken = default)
@@ -117,7 +117,7 @@ namespace Lemon.Hosting.AvaloniauiDesktop
                 return RunAvaloniauiApplicationCore(host, lifetime, cancellationToken);
             }
         }
-        private static Task RunAvaloniauiApplicationCore<TMainWindow>(IHost host,
+        private static Task RunAvaloniauiApplicationCore<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TMainWindow>(IHost host,
             string[]? commandArgs,
             ShutdownMode shutdownMode = ShutdownMode.OnMainWindowClose,
             CancellationToken cancellationToken = default) where TMainWindow : Window
