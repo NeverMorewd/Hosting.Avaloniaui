@@ -45,8 +45,5 @@
     <Compile Update="AppEmpty.axaml.cs">
       <DependentUpon>AppEmpty.axaml</DependentUpon>
     </Compile>
-    <Compile Update="AppWithServiceProvider.axaml.cs">
-      <DependentUpon>AppWithServiceProvider.axaml</DependentUpon>
-    </Compile>
   </ItemGroup>
 </Project>

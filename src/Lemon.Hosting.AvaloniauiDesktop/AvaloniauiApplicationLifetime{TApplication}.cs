@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 
@@ -22,14 +23,30 @@ public sealed class AvaloniauiApplicationLifetime<[DynamicallyAccessedMembers(Dy
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly TaskCompletionSource<object?> _applicationExited = new();
     private readonly IServiceProvider _provider;
+    private TApplication? _application;
+    private readonly ILogger? _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AvaloniauiApplicationLifetime{TApplication}"/> class.
     /// </summary>
-    public AvaloniauiApplicationLifetime(IHostApplicationLifetime applicationLifetime, IServiceProvider provider)
+    public AvaloniauiApplicationLifetime(IHostApplicationLifetime applicationLifetime, 
+        IServiceProvider provider,
+        ILogger<AvaloniauiApplicationLifetime<TApplication>>? logger = null)
     {
         _applicationLifetime = applicationLifetime;
         _provider = provider;
+        _logger = logger;
+    }
+
+    public AvaloniauiApplicationLifetime(IHostApplicationLifetime applicationLifetime,
+        IServiceProvider provider,
+        TApplication application,
+        ILogger<AvaloniauiApplicationLifetime<TApplication>>? logger = null)
+    {
+        _application = application;
+        _applicationLifetime = applicationLifetime;
+        _provider = provider;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -38,9 +55,9 @@ public sealed class AvaloniauiApplicationLifetime<[DynamicallyAccessedMembers(Dy
         var ready = new TaskCompletionSource<object?>();
         using var registration = cancellationToken.Register(() => ready.TrySetCanceled(cancellationToken));
 
-        var application = _provider.GetRequiredService<TApplication>();
+        _application??= _provider.GetRequiredService<TApplication>();
 
-        if (application.ApplicationLifetime is IControlledApplicationLifetime desktopLifetime)
+        if (_application.ApplicationLifetime is IControlledApplicationLifetime desktopLifetime)
         {
             desktopLifetime.Startup += (_, _) => ready.TrySetResult(null);
             desktopLifetime.Exit += (_, _) =>
@@ -59,8 +76,12 @@ public sealed class AvaloniauiApplicationLifetime<[DynamicallyAccessedMembers(Dy
     /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        Dispatcher.UIThread.BeginInvokeShutdown(DispatcherPriority.Default);
+        if (!_applicationExited.Task.IsCompleted)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            _logger?.LogInformation("Shutting down Avalonia UI thread...");
+            Dispatcher.UIThread.BeginInvokeShutdown(DispatcherPriority.Normal);
+        }
         return _applicationExited.Task;
     }
 }
