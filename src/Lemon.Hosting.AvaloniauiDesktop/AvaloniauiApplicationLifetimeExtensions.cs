@@ -51,8 +51,11 @@ public static class AvaloniauiApplicationLifetimeExtensions
         Func<ClassicDesktopStyleApplicationLifetime>? lifetimeFactory = null)
     {
         var appBuilder = appBuilderFactory();
-        var lifetime = lifetimeFactory?.Invoke() ?? new ClassicDesktopStyleApplicationLifetime();
-        appBuilder = appBuilder.SetupWithLifetime(lifetime);
+        if (appBuilder.Instance == null || appBuilder.Instance.ApplicationLifetime == null)
+        {
+            var lifetime = lifetimeFactory?.Invoke() ?? new ClassicDesktopStyleApplicationLifetime();
+            appBuilder = appBuilder.SetupWithLifetime(lifetime);
+        }
      
         if(appBuilder.Instance is null)
             throw new InvalidOperationException("AppBuilder.Instance is null after SetupWithLifetime!");
@@ -131,7 +134,7 @@ public static class AvaloniauiApplicationLifetimeExtensions
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public static Task RunAvaloniaAppAsync(this IHost host, CancellationToken cancellationToken = default)
+    public static Task<int> RunAvaloniaAppAsync(this IHost host, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         _ = host ?? throw new ArgumentNullException(nameof(host));
@@ -157,13 +160,17 @@ public static class AvaloniauiApplicationLifetimeExtensions
 
     
 
-    private static Task RunHostAsync(IHost host,
+    private static Task<int> RunHostAsync(IHost host,
         ClassicDesktopStyleApplicationLifetime lifetime,
         CancellationToken cancellationToken = default)
     {
-        var hostTask = host.RunAsync(token: cancellationToken);
-        Environment.ExitCode = lifetime.Start(lifetime.Args ?? []);
+        var cts = new CancellationTokenSource();
+        if (!cancellationToken.CanBeCanceled)
+        {
+            cancellationToken = cts.Token;
+        }
+        _ = host.RunAsync(token: cancellationToken);
         Debug.WriteLine($"ApplicationLifetime is terminated:{Environment.ExitCode}");
-        return hostTask;
+        return Task.FromResult(lifetime.Start(lifetime.Args ?? []));
     }
 }
