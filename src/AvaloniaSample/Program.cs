@@ -11,8 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace AvaloniaSample;
 
@@ -22,7 +24,7 @@ internal sealed class Program
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]
     [SupportedOSPlatform("macos")]
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var hostBuilder = Host.CreateApplicationBuilder();
 
@@ -40,13 +42,16 @@ internal sealed class Program
         #region run app default
         //RunApp(hostBuilder);
         #endregion
-
+        #region run app async
+        var exitCode = await RunAppAsync(hostBuilder);
+        Debug.WriteLine($"exitCode:{exitCode}");
+        #endregion
         #region run empty app with mainwindow
         //RunAppWithMainWindow(hostBuilder);
         #endregion
 
         #region run app with lifetime
-        RunAppWithLifetimePreSetup(hostBuilder, args);
+        //RunAppWithLifetimePreSetup(hostBuilder, args);
         #endregion
     }
 
@@ -80,6 +85,16 @@ internal sealed class Program
         hostBuilder.Services.AddAppBuilder(BuildAvaloniaApp);
         var appHost = hostBuilder.Build();
         appHost.RunAvaloniaAppAsync();
+    }
+    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("linux")]
+    [SupportedOSPlatform("macos")]
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+    private static Task<int> RunAppAsync(HostApplicationBuilder hostBuilder)
+    {
+        hostBuilder.Services.AddAppBuilder(BuildAvaloniaApp);
+        var appHost = hostBuilder.Build();
+        return appHost.RunAvaloniaAppAsync();
     }
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]
