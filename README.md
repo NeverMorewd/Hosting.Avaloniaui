@@ -55,5 +55,5 @@ internal sealed class Program
 }
 ```
 
-References:
+# Credit
 [Nito.Host.Wpf](https://github.com/StephenCleary/Hosting)
